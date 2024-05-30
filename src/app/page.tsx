@@ -3,9 +3,12 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
 import { AirtableService } from "./lib/airtable.service";
+import { onCheckCoupon } from "./lib/coupon.service";
+
 import InputField from "./components/inputfield";
 import CodeInputField from "./components/codeinputfield";
 import Notification from "./components/notification";
+import LoadingSkeleton from "./components/loadingskeleton"; 
 
 const couponTableService = new AirtableService("Coupon");
 const applicantTableService = new AirtableService("Applicant");
@@ -13,9 +16,10 @@ const applicantTableService = new AirtableService("Applicant");
 export default function Home() {
   const [couponRecords, setCouponRecords] = useState<any[]>([]);
   const [applicantRecords, setApplicantRecords] = useState<any[]>([]);
+  const [revealedCodes, setRevealedCodes] = useState<string[]>([]);
 
-  const [couponCode, setCouponCode] = useState("");
-  const [idCode, setIdCode] = useState("");
+  const [inputCoupon, setInputCoupon] = useState("");
+  const [inputId, setInputId] = useState("");
 
   const [applicantCode1, setApplicantCode1] = useState("");
   const [applicantCode2, setApplicantCode2] = useState("");
@@ -24,11 +28,14 @@ export default function Home() {
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [special, setSpecial] = useState("");
 
   const [applicantCode1Error, setApplicantCode1Error] = useState(false);
   const [applicantCode2Error, setApplicantCode2Error] = useState(false);
   const [applicantCode3Error, setApplicantCode3Error] = useState(false);
   const [applicantCode4Error, setApplicantCode4Error] = useState(false);
+
+  const [loading, setLoading] = useState(false);  
 
   useEffect(() => {
     couponTableService
@@ -39,101 +46,54 @@ export default function Home() {
       .then((res) => setApplicantRecords(res.slice()));
   }, []);
 
-  const onCheckCoupon = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    setCouponCode("");
-
-    setApplicantCode1Error(false);
-    setApplicantCode2Error(false);
-    setApplicantCode3Error(false);
-    setApplicantCode4Error(false);
-
-    const couponRecord = couponRecords.find(
-      (r) => r.fields.code === couponCode
-    );
-
-    const applicantRecord = applicantRecords.find((r) => {
-      return (
-        r.fields.c1 === applicantCode1 &&
-        r.fields.c2 === applicantCode2 &&
-        r.fields.c3 === applicantCode3 &&
-        r.fields.c4 === applicantCode4
-      );
-    });
-
-    const applicantC1 = applicantRecords.find(
-      (r) => r.fields.c1 === applicantCode1 && r.fields.id === idCode
-    );
-    const applicantC2 = applicantRecords.find(
-      (r) => r.fields.c2 === applicantCode2 && r.fields.id === idCode
-    );
-    const applicantC3 = applicantRecords.find(
-      (r) => r.fields.c3 === applicantCode3 && r.fields.id === idCode
-    );
-    const applicantC4 = applicantRecords.find(
-      (r) => r.fields.c4 === applicantCode4 && r.fields.id === idCode
-    );
-
-    const idRecord = applicantRecords.find((r) => r.fields.id === idCode);
-
-    if (couponRecord && couponRecord.fields.status === "UNUSED") {
-      await couponTableService.updateRecord(couponRecord.id, {
-        status: "USED",
-      });
-
-      const updatedCoupons = await couponTableService.listRecords();
-      setCouponRecords(updatedCoupons.slice());
-
-      if (couponRecord.fields.type === "NORMAL") {
-        if (applicantRecord && idRecord) {
-          setSuccess("Congratulations!! You have received a reward. 🎉🎉");
-        } else {
-          setError(
-            "One or more applicant code inputs are incorrect. Please check the highlighted fields."
-          );
-          if (!applicantC1) {
-            setApplicantCode1Error(true);
-          }
-          if (!applicantC2) {
-            setApplicantCode2Error(true);
-          }
-          if (!applicantC3) {
-            setApplicantCode3Error(true);
-          }
-          if (!applicantC4) {
-            setApplicantCode4Error(true);
-          }
-        }
-      }
-    } else if (couponRecord.fields.type === "SPECIAL") {
-    } else {
-      setError("coupon code already used");
-    }
-  };
-
   const handleInputChange =
     (setter: Dispatch<SetStateAction<string>>) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setter(e.target.value);
     };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);  
+    await onCheckCoupon(
+      e,
+      inputCoupon,
+      inputId,
+      applicantCode1,
+      applicantCode2,
+      applicantCode3,
+      applicantCode4,
+      couponRecords,
+      applicantRecords,
+      setCouponRecords,
+      setRevealedCodes,
+      setError,
+      setSuccess,
+      setSpecial,
+      setApplicantCode1Error,
+      setApplicantCode2Error,
+      setApplicantCode3Error,
+      setApplicantCode4Error
+    );
+    setLoading(false);  
+  };
+
   return (
     <div className="w-full h-screen flex justify-center bg-white text-black">
       <div className="w-[500px] h-full px-5 flex flex-col items-center justify-center space-y-5">
-        <form onSubmit={onCheckCoupon} className="w-full flex flex-col ">
+        <form onSubmit={handleSubmit} className="w-full flex flex-col ">
           <InputField
             label="Your ID"
             type="number"
-            value={idCode}
-            onChange={handleInputChange(setIdCode)}
+            value={inputId}
+            onChange={handleInputChange(setInputId)}
             required
+            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <InputField
             label="Your Coupon"
             type="text"
-            value={couponCode}
-            onChange={handleInputChange(setCouponCode)}
+            value={inputCoupon}
+            onChange={handleInputChange(setInputCoupon)}
             required
           />
           <div className="mb-5 flex flex-col justify-center">
@@ -173,19 +133,36 @@ export default function Home() {
             Submit
           </button>
         </form>
-        {error && (
-          <Notification
-            message={error}
-            type="error"
-            onClose={() => setError("")}
-          />
-        )}
-        {success && (
-          <Notification
-            message={success}
-            type="success"
-            onClose={() => setSuccess("")}
-          />
+        {loading ? (
+          <LoadingSkeleton />
+        ) : (
+          <>
+            {error && (
+              <Notification
+                message={error}
+                type="error"
+                onClose={() => setError("")}
+              />
+            )}
+            {success && (
+              <Notification
+                message={success}
+                type="success"
+                onClose={() => setSuccess("")}
+              />
+            )}
+            {special && (
+              <Notification
+                message={special}
+                type="special"
+                code1={revealedCodes[0]}
+                code2={revealedCodes[1]}
+                code3={revealedCodes[2]}
+                code4={revealedCodes[3]}
+                onClose={() => setSpecial("")}
+              />
+            )}
+          </>
         )}
       </div>
     </div>
