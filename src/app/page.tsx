@@ -8,7 +8,7 @@ import { onCheckCoupon } from "./lib/coupon.service";
 import InputField from "./components/inputfield";
 import CodeInputField from "./components/codeinputfield";
 import Notification from "./components/notification";
-import LoadingSkeleton from "./components/loadingskeleton"; 
+import LoadingSkeleton from "./components/loadingskeleton";
 
 const couponTableService = new AirtableService("Coupon");
 const applicantTableService = new AirtableService("Applicant");
@@ -35,7 +35,7 @@ export default function Home() {
   const [applicantCode3Error, setApplicantCode3Error] = useState(false);
   const [applicantCode4Error, setApplicantCode4Error] = useState(false);
 
-  const [loading, setLoading] = useState(false);  
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     couponTableService
@@ -53,7 +53,7 @@ export default function Home() {
     };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    setLoading(true);  
+    setLoading(true);
     await onCheckCoupon(
       e,
       inputCoupon,
@@ -74,20 +74,23 @@ export default function Home() {
       setApplicantCode3Error,
       setApplicantCode4Error
     );
-    setLoading(false);  
+    setLoading(false);
   };
 
   return (
-    <div className="w-full h-screen flex justify-center bg-white text-black">
-      <div className="w-[500px] h-full px-5 flex flex-col items-center justify-center space-y-5">
-        <form onSubmit={handleSubmit} className="w-full flex flex-col ">
+    <div className="w-full h-screen flex justify-center bg-gray-100 text-gray-900">
+      <div className="w-full max-w-md h-full px-6 flex flex-col items-center justify-center space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full flex flex-col space-y-4"
+        >
           <InputField
             label="Your ID"
             type="number"
             value={inputId}
             onChange={handleInputChange(setInputId)}
             required
-            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <InputField
             label="Your Coupon"
@@ -95,15 +98,13 @@ export default function Home() {
             value={inputCoupon}
             onChange={handleInputChange(setInputCoupon)}
             required
+            className="bg-white border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          <div className="mb-5 flex flex-col justify-center">
-            <label
-              htmlFor="Applicant1"
-              className="block mb-2 text-sm font-medium text-gray-900"
-            >
+          <div className="flex flex-col space-y-2">
+            <label className="text-sm font-medium text-gray-700">
               Your Number
             </label>
-            <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center justify-between gap-2">
               <CodeInputField
                 value={applicantCode1}
                 onChange={handleInputChange(setApplicantCode1)}
@@ -128,7 +129,7 @@ export default function Home() {
           </div>
           <button
             type="submit"
-            className="mt-5 w-max text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm  px-5 py-2.5 text-center shadow-lg"
+            className="mt-5 w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-lg"
           >
             Submit
           </button>

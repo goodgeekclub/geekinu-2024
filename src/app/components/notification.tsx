@@ -36,53 +36,30 @@ export default function Notification({
       transition={{ duration: 0.5 }}
       className={`mx-5 absolute top-0 flex flex-col ${
         type === "error"
-          ? "bg-red-400"
+          ? "bg-red-500 text-white"
           : type === "special"
-          ? "bg-yellow-400"
-          : "bg-green-400"
-      } px-4 md:px-8 py-4 text-xs md:text-sm rounded-xl shadow-lg`}
+          ? "bg-yellow-500 text-black"
+          : "bg-green-500 text-white"
+      } px-6 py-4 md:px-8 md:py-6 text-sm md:text-base rounded-lg shadow-lg`}
     >
-      {message}
+      <span className="font-semibold">{message}</span>
       {type === "special" && (
-        <div className="mt-5 flex justify-between">
-          <input
-            type="text"
-            className={cn(
-              "w-12 md:w-14 h-12 md:h-14 text-center text-xl sm:text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-            )}
-            maxLength={1}
-            disabled
-            value={code1}
-          />
-          <input
-            type="text"
-            className={cn(
-              "w-12 md:w-14 h-12 md:h-14 text-center text-xl sm:text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-            )}
-            maxLength={1}
-            disabled
-            value={code2}
-          />
-          <input
-            type="text"
-            className={cn(
-              "w-12 md:w-14 h-12 md:h-14 text-center text-xl sm:text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-            )}
-            maxLength={1}
-            disabled
-            value={code3}
-          />
-          <input
-            type="text"
-            className={cn(
-              "w-12 md:w-14 h-12 md:h-14 text-center text-xl sm:text-2xl font-extrabold text-slate-900 bg-slate-100 border border-transparent hover:border-slate-200 appearance-none rounded p-4 outline-none focus:bg-white focus:border-indigo-400 focus:ring-2 focus:ring-indigo-100"
-            )}
-            maxLength={1}
-            disabled
-            value={code4}
-          />
+        <div className="mt-4 flex justify-between space-x-2">
+          {[code1, code2, code3, code4].map((code, index) => (
+            <input
+              key={index}
+              type="text"
+              className={cn(
+                "w-12 md:w-14 h-12 md:h-14 text-center text-lg md:text-xl font-bold text-gray-900 bg-gray-100 border border-gray-300 rounded-lg p-2 outline-none focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+              )}
+              maxLength={1}
+              disabled
+              value={code}
+            />
+          ))}
         </div>
       )}
     </motion.div>
   );
 }
+

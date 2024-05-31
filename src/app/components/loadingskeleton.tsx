@@ -7,17 +7,22 @@ const LoadingSkeleton = () => {
       animate={{ y: 0, opacity: 1 }}
       exit={{ transitionEnd: { y: -10, opacity: 0 } }}
       transition={{ duration: 0.5 }}
-      className="absolute top-0 bg-indigo-500 text-white font-bold px-4 md:px-8 py-4 rounded-xl inline-flex items-center shadow-lg"
+      className="absolute top-0 bg-blue-600 text-white font-semibold px-6 py-4 rounded-lg inline-flex items-center shadow-lg"
       disabled
     >
-      <svg className="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24">
+      <svg
+        className="animate-spin h-5 w-5 mr-3 text-white"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+      >
         <circle
           className="opacity-25"
           cx="12"
           cy="12"
           r="10"
           stroke="currentColor"
-          stroke-width="4"
+          strokeWidth="4"
         ></circle>
         <path
           className="opacity-75"

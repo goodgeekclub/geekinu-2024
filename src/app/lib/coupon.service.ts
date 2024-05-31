@@ -57,97 +57,109 @@ export async function onCheckCoupon(
 
   const idRecord = applicantRecords.find((r) => r.fields.qrcodes === inputId);
 
-  if (couponRecord && couponRecord.fields.status === "UNUSED") {
-    await couponTableService.updateRecord(couponRecord.id, {
-      status: "USED",
-    });
+  if (couponRecord) {
+    if (couponRecord && couponRecord.fields.status === "UNUSED") {
+      await couponTableService.updateRecord(couponRecord.id, {
+        status: "USED",
+      });
 
-    const updatedCoupons = await couponTableService.listRecords();
-    setCouponRecords(updatedCoupons.slice());
+      const updatedCoupons = await couponTableService.listRecords();
+      setCouponRecords(updatedCoupons.slice());
 
-    if (couponRecord && couponRecord.fields.type === "NORMAL") {
-      if (applicantRecord && idRecord) {
-        setSuccess("Congratulations!! You have received a reward. 🎉🎉");
-      } else {
-        setError(
-          "One or more applicant code inputs are incorrect. Please check the highlighted fields."
-        );
-        if (!applicantC1) {
-          setApplicantCode1Error(true);
+      if (couponRecord && couponRecord.fields.type === "NORMAL") {
+        if (applicantRecord && idRecord) {
+          setSuccess("Congratulations!! You have received a reward. 🎉🎉");
+        } else {
+          setError(
+            "One or more applicant code inputs are incorrect. Please check the highlighted fields."
+          );
+          if (!applicantC1) {
+            setApplicantCode1Error(true);
+          }
+          if (!applicantC2) {
+            setApplicantCode2Error(true);
+          }
+          if (!applicantC3) {
+            setApplicantCode3Error(true);
+          }
+          if (!applicantC4) {
+            setApplicantCode4Error(true);
+          }
         }
-        if (!applicantC2) {
-          setApplicantCode2Error(true);
+      } else if (couponRecord && couponRecord.fields.type === "SPECIAL") {
+        setSpecial("You got access to reveal your code :)");
+
+        let revealedCodes: string[] = [];
+
+        const revealC1 = idRecord.fields.c1;
+        const revealC2 = idRecord.fields.c2;
+        const revealC3 = idRecord.fields.c3;
+        const revealC4 = idRecord.fields.c4;
+
+        switch (couponRecord.fields.class) {
+          case "bronze":
+            revealedCodes = revealCodesInOrder(
+              [revealC1, revealC2, revealC3, revealC4],
+              1
+            );
+            break;
+          case "silver":
+            revealedCodes = revealCodesInOrder(
+              [revealC1, revealC2, revealC3, revealC4],
+              2
+            );
+            break;
+          case "gold":
+            revealedCodes = revealCodesInOrder(
+              [revealC1, revealC2, revealC3, revealC4],
+              3
+            );
+            break;
+          case "platinum":
+            revealedCodes = [revealC1, revealC2, revealC3, revealC4];
+            break;
         }
-        if (!applicantC3) {
-          setApplicantCode3Error(true);
-        }
-        if (!applicantC4) {
-          setApplicantCode4Error(true);
+        setRevealedCodes(revealedCodes);
+
+        if (applicantRecord && idRecord) {
+          setSuccess("Congratulations!! You have received a reward. 🎉🎉");
+        } else {
+          if (!applicantC1) {
+            setApplicantCode1Error(true);
+          }
+          if (!applicantC2) {
+            setApplicantCode2Error(true);
+          }
+          if (!applicantC3) {
+            setApplicantCode3Error(true);
+          }
+          if (!applicantC4) {
+            setApplicantCode4Error(true);
+          }
         }
       }
-    } else if (couponRecord && couponRecord.fields.type === "SPECIAL") {
-      setSpecial("You got access to reveal your code :)");
-
-      let revealedCodes: string[] = [];
-
-      const revealC1 = idRecord.fields.c1;
-      const revealC2 = idRecord.fields.c2;
-      const revealC3 = idRecord.fields.c3;
-      const revealC4 = idRecord.fields.c4;
-
-      switch (couponRecord.fields.class) {
-        case "bronze":
-          revealedCodes = revealCodesInOrder([revealC1, revealC2, revealC3, revealC4], 1);
-          break;
-        case "silver":
-          revealedCodes = revealCodesInOrder([revealC1, revealC2, revealC3, revealC4], 2);
-          break;
-        case "gold":
-          revealedCodes = revealCodesInOrder([revealC1, revealC2, revealC3, revealC4], 3);
-          break;
-        case "platinum":
-          revealedCodes = [revealC1, revealC2, revealC3, revealC4];
-          break;
-      }      
-      setRevealedCodes(revealedCodes);
-
-      if (applicantRecord && idRecord) {
-        setSuccess("Congratulations!! You have received a reward. 🎉🎉");
-      } else {
-        if (!applicantC1) {
-          setApplicantCode1Error(true);
-        }
-        if (!applicantC2) {
-          setApplicantCode2Error(true);
-        }
-        if (!applicantC3) {
-          setApplicantCode3Error(true);
-        }
-        if (!applicantC4) {
-          setApplicantCode4Error(true);
-        }
-      }
+    } else {
+      setError("Coupon code already used");
     }
   } else {
-    setError("coupon code already used");
+    setError("Coupon does not exist");
   }
 }
 
 function revealCodesInOrder(codes: string[], revealCount: number): string[] {
-    let revealed = ["", "", "", ""];
-    let indices = [0, 1, 2, 3];
-  
-    // Shuffle the indices array
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
-    }
-  
-    // Reveal the specified number of codes
-    for (let i = 0; i < revealCount; i++) {
-      revealed[indices[i]] = codes[indices[i]];
-    }
-  
-    return revealed;
+  let revealed = ["", "", "", ""];
+  let indices = [0, 1, 2, 3];
+
+  // Shuffle the indices array
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
   }
-  
+
+  // Reveal the specified number of codes
+  for (let i = 0; i < revealCount; i++) {
+    revealed[indices[i]] = codes[indices[i]];
+  }
+
+  return revealed;
+}
