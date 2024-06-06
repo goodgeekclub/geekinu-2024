@@ -1,6 +1,7 @@
 "use client";
 
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import Image from "next/image";
 
 import { AirtableService } from "./lib/airtable.service";
 import { onCheckCoupon } from "./lib/coupon.service";
@@ -9,6 +10,8 @@ import InputField from "./components/inputfield";
 import CodeInputField from "./components/codeinputfield";
 import Notification from "./components/notification";
 import LoadingSkeleton from "./components/loadingskeleton";
+
+import Logo from "../../public/images/logo.png";
 
 const couponTableService = new AirtableService("Coupon");
 const applicantTableService = new AirtableService("Applicant");
@@ -36,6 +39,7 @@ export default function Home() {
   const [applicantCode4Error, setApplicantCode4Error] = useState(false);
 
   const [loading, setLoading] = useState(false);
+  const [disableSubmit, setDisableSubmit] = useState(false);
 
   useEffect(() => {
     couponTableService
@@ -53,7 +57,10 @@ export default function Home() {
     };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
+    setDisableSubmit(true);
+    setTimeout(() => setDisableSubmit(false), 2000);
     await onCheckCoupon(
       e,
       inputCoupon,
@@ -78,8 +85,13 @@ export default function Home() {
   };
 
   return (
-    <div className="w-full h-screen flex justify-center bg-gray-100 text-gray-900">
-      <div className="w-full max-w-md h-full px-6 flex flex-col items-center justify-center space-y-6">
+    <div className="w-full relative h-full flex flex-col items-center justify-center bg-gray-100 text-gray-900">
+      <div className="w-full max-w-md h-full px-6 flex flex-col space-y-10">
+        <div className="">
+          <div className="flex justify-center my-5 ">
+            <Image src={Logo} width={250} height={0} alt="" loading="lazy" />
+          </div>
+        </div>
         <form
           onSubmit={handleSubmit}
           className="w-full flex flex-col space-y-4"
@@ -129,11 +141,30 @@ export default function Home() {
           </div>
           <button
             type="submit"
-            className="mt-5 w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-lg"
+            disabled={disableSubmit}
+            className={`mt-5 w-full text-white font-medium rounded-lg text-sm px-5 py-2.5 text-center shadow-lg ${
+              disableSubmit
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+            }`}
           >
             Submit
           </button>
         </form>
+        <div className="pt-5 pb-10 flex flex-col justify-start font-medium text-gray-700 leading-relaxed tracking-wide">
+          <h4 className="mb-2 font-semibold">How to play :</h4>
+          <li>
+            Each person will receive four numbers to generate as their own.
+          </li>
+          <li>
+            There will be a coupon that can be used to check the numbers in all
+            four places, whether they are correct or not.
+          </li>
+          <li>
+            Take a screenshot if all four numbers are correct and Redeem rewards
+            during the event summary.
+          </li>
+        </div>
         {loading ? (
           <LoadingSkeleton />
         ) : (
