@@ -1,6 +1,6 @@
 "use client";
 
-import { Dispatch, SetStateAction, useEffect, useState } from "react";
+import { Dispatch, SetStateAction, createRef, useEffect, useRef, useState } from "react";
 
 import { AirtableService } from "./lib/airtable.service";
 import { onCheckCoupon } from "./lib/coupon.service";
@@ -17,6 +17,7 @@ export default function Home() {
   const [couponRecords, setCouponRecords] = useState<any[]>([]);
   const [applicantRecords, setApplicantRecords] = useState<any[]>([]);
   const [revealedCodes, setRevealedCodes] = useState<string[]>([]);
+  const [focusIndex, setFocusIndex] = useState<number>(1);
 
   const [inputCoupon, setInputCoupon] = useState("");
   const [inputId, setInputId] = useState("");
@@ -37,6 +38,13 @@ export default function Home() {
 
   const [loading, setLoading] = useState(false);
 
+  const formRef = useRef<HTMLFormElement>(null);
+  const inputCodeRef1 = useRef<HTMLInputElement>(null);
+  const inputCodeRef2 = useRef<HTMLInputElement>(null);
+  const inputCodeRef3 = useRef<HTMLInputElement>(null);
+  const inputCodeRef4 = useRef<HTMLInputElement>(null);
+
+
   useEffect(() => {
     couponTableService
       .listRecords()
@@ -51,6 +59,18 @@ export default function Home() {
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setter(e.target.value);
     };
+  const handleCodeInput = (idx: number, fn: Function, val: string) => {
+    fn(val)
+    if (idx === 1 && inputCodeRef2.current) {
+      inputCodeRef2.current.focus();
+    }
+    if (idx === 2 && inputCodeRef3.current) {
+      inputCodeRef3.current.focus();
+    }
+    if (idx === 3 && inputCodeRef4.current) {
+      inputCodeRef4.current.focus();
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -81,6 +101,7 @@ export default function Home() {
     <div className="w-full h-screen flex justify-center bg-gray-100 text-gray-900">
       <div className="w-full max-w-md h-full px-6 flex flex-col items-center justify-center space-y-6">
         <form
+          ref={formRef}
           onSubmit={handleSubmit}
           className="w-full flex flex-col space-y-4"
         >
@@ -106,23 +127,31 @@ export default function Home() {
             </label>
             <div className="flex items-center justify-between gap-2">
               <CodeInputField
+                ref={inputCodeRef1}
                 value={applicantCode1}
-                onChange={handleInputChange(setApplicantCode1)}
+                onChange={(e) => handleCodeInput(1, setApplicantCode1, e.target.value)}
+                autoFocus={focusIndex === 1}
                 error={applicantCode1Error}
               />
               <CodeInputField
+                ref={inputCodeRef2}
                 value={applicantCode2}
-                onChange={handleInputChange(setApplicantCode2)}
+                onChange={(e) => handleCodeInput(2, setApplicantCode2, e.target.value)}
+                autoFocus={focusIndex === 2}
                 error={applicantCode2Error}
               />
               <CodeInputField
+                ref={inputCodeRef3}
                 value={applicantCode3}
-                onChange={handleInputChange(setApplicantCode3)}
+                onChange={(e) => handleCodeInput(3, setApplicantCode3, e.target.value)}
+                autoFocus={focusIndex === 3}
                 error={applicantCode3Error}
               />
               <CodeInputField
+                ref={inputCodeRef4}
                 value={applicantCode4}
-                onChange={handleInputChange(setApplicantCode4)}
+                onChange={(e) => handleCodeInput(4, setApplicantCode4, e.target.value)}
+                autoFocus={focusIndex === 4}
                 error={applicantCode4Error}
               />
             </div>
